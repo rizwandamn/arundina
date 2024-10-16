@@ -22,32 +22,30 @@ $result = mysqli_query($conn, $query);
 </head>
 <body>
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
-        <div class="container-fluid">
-            <a class="navbar-brand text-white" href="#">Arsip Surat</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                <span class="navbar-toggler-icon"></span>
-            </button>
-            <div class="collapse navbar-collapse" id="navbarNav">
-                <ul class="navbar-nav ms-auto">
-                    <?php if (isset($_SESSION['username'])): ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="logout.php">Logout</a>
-                        </li>
-                    <?php else: ?>
-                        <li class="nav-item">
-                            <a class="nav-link text-white" href="login.php">Login</a>
-                        </li>
-                    <?php endif; ?>
-                </ul>
-            </div>
+<nav class="navbar navbar-expand-lg navbar-light bg-primary">
+    <div class="container-fluid">
+        <a class="navbar-brand text-white" href="#">PolnepArsipin</a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="login.php">Login</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link text-white" href="register.php">Registrasi</a>
+                </li>
+            </ul>
         </div>
-    </nav>
+    </div>
+</nav>
 
-    <!-- Hero Section dan Form Pencarian -->
-<div class="search-container text-center mt-5"> <!-- Tambahkan class 'text-center' -->
-    <h1>Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
-    <form method="GET" action="search.php" class="d-inline-block mt-3"> <!-- Tambahkan 'd-inline-block' -->
+   <!-- Hero Section dan Form Pencarian -->
+<div class="search-container text-center mt-5"> <!-- pastikan ini di luar <nav> -->
+    <h1>Selamat Datang di PolnepArsipin</h1>
+    <p>IT'S ALL ABOUT ARCHIVE</p> <!-- Tambahkan tagline (opsional) -->
+    <form method="GET" action="search.php" class="d-inline-block mt-3">
         <input type="text" name="search" class="search-input form-control" placeholder="Cari dokumen..." required>
         <button type="submit" class="btn btn-primary btn-search mt-2">Cari</button>
     </form>
