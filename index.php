@@ -1,7 +1,6 @@
 <?php
 // Mulai session jika ada pengguna yang login
 session_start();
-// checkLogin();
 
 // Koneksi ke database
 include 'db.php';
@@ -18,6 +17,12 @@ $result = mysqli_query($conn, $query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arsip Keputusan & Surat Tugas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .search-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+    </style>
 </head>
 <body>
     <!-- Navbar -->
@@ -29,9 +34,6 @@ $result = mysqli_query($conn, $query);
             </button>
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item">
-                        <a class="nav-link" href="search.php">Cari Dokumen</a>
-                    </li>
                     <?php if (isset($_SESSION['username'])): ?>
                         <li class="nav-item">
                             <a class="nav-link" href="logout.php">Logout</a>
@@ -51,6 +53,16 @@ $result = mysqli_query($conn, $query);
         <div class="jumbotron text-center">
             <h1 class="display-4">Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
             <p class="lead">Sistem ini menyimpan dokumen penting yang dapat diakses oleh Admin dan Dosen.</p>
+
+            <!-- Form Pencarian -->
+            <div class="search-container">
+                <form method="GET" action="search.php">
+                    <div class="input-group">
+                        <input type="text" name="search" class="form-control" placeholder="Cari dokumen..." required>
+                        <button type="submit" class="btn btn-primary">Cari</button>
+                    </div>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -63,11 +75,11 @@ $result = mysqli_query($conn, $query);
                     <div class="col-md-4">
                         <div class="card mb-4">
                             <div class="card-body">
-                                <h5 class="card-title"><?= $row['title']; ?></h5>
-                                <p class="card-text"><?= $row['deskripsi']; ?></p>
-                                <p><strong>Kategori:</strong> <?= $row['kategori']; ?></p>
-                                <p><strong>Jenis:</strong> <?= $row['jenis']; ?></p>
-                                <p><strong>Tanggal:</strong> <?= $row['tanggal_surat']; ?></p>
+                                <h5 class="card-title"><?= htmlspecialchars($row['title']); ?></h5>
+                                <p class="card-text"><?= htmlspecialchars($row['deskripsi']); ?></p>
+                                <p><strong>Kategori:</strong> <?= htmlspecialchars($row['kategori']); ?></p>
+                                <p><strong>Jenis:</strong> <?= htmlspecialchars($row['jenis']); ?></p>
+                                <p><strong>Tanggal:</strong> <?= htmlspecialchars($row['tanggal_surat']); ?></p>
                                 <a href="preview_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-primary">Preview</a>
                                 <a href="download_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-success">Download</a>
                             </div>

@@ -2,17 +2,8 @@
 session_start();
 require 'db.php'; // Koneksi ke database
 
-// Fungsi untuk mengecek apakah user sudah login
-function checkLogin() {
-    if (!isset($_SESSION['id_user'])) {
-        header("Location: login.php");
-        exit();
-    }
-}
-
 // Cek apakah pengguna adalah dosen dan sudah login
-checkLogin();
-if ($_SESSION['role'] !== 'dosen') {
+if (!isset($_SESSION['id_user']) || $_SESSION['role'] !== 'dosen') {
     header("Location: login.php");
     exit();
 }
@@ -24,38 +15,26 @@ error_reporting(E_ALL);
 
 $search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
 
-// Query untuk mengambil dokumen yang ditandai oleh dosen yang sedang login
+// Query untuk mencari dokumen
 $query = "
     SELECT d.*
     FROM dokumen d
     JOIN marked_dokumen md ON d.id_dokumen = md.id_dokumen
-    WHERE md.id_user = ?
+    WHERE md.id_user = ? AND (d.title LIKE ? OR d.no_surat LIKE ?)
+    ORDER BY d.created_at DESC
 ";
-
-if ($search) {
-    $query .= " AND (d.title LIKE ? OR d.no_surat LIKE ?)";
-}
-
-$query .= " ORDER BY d.created_at DESC";
 
 // Mempersiapkan statement SQL untuk menghindari SQL injection
 if ($stmt = mysqli_prepare($conn, $query)) {
-    if ($search) {
-        $searchParam = "%" . $search . "%";
-        mysqli_stmt_bind_param($stmt, 'iss', $_SESSION['id_user'], $searchParam, $searchParam); // Bind parameter id_user dan pencarian
-    } else {
-        mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id_user']); // Bind parameter id_user
-    }
+    $searchParam = "%" . $search . "%";
+    mysqli_stmt_bind_param($stmt, 'iss', $_SESSION['id_user'], $searchParam, $searchParam); // Bind parameter id_user dan pencarian
     mysqli_stmt_execute($stmt); // Eksekusi statement
     $result = mysqli_stmt_get_result($stmt); // Ambil hasil eksekusi query
 
     if (!$result) {
         die("Query error: " . mysqli_error($conn));
     }
-} else {
-    die("Statement preparation failed: " . mysqli_error($conn));
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -63,18 +42,12 @@ if ($stmt = mysqli_prepare($conn, $query)) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard Dosen</title>
+    <title>Hasil Pencarian</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
 </head>
 <body>
     <div class="container">
-        <h1 class="mt-4">Dashboard Dosen</h1>
-
-        <!-- Form pencarian -->
-        <form method="GET" action="">
-            <input type="text" name="search" placeholder="Cari dokumen..." value="<?= htmlspecialchars($search); ?>" />
-            <button type="submit" class="btn btn-primary">Cari</button>
-        </form>
+        <h1 class="mt-4">Hasil Pencarian untuk "<?= htmlspecialchars($search); ?>"</h1>
 
         <!-- Tabel daftar dokumen -->
         <table class="table table-striped mt-4">
@@ -109,13 +82,14 @@ if ($stmt = mysqli_prepare($conn, $query)) {
                     <?php endwhile; ?>
                 <?php else: ?>
                     <tr>
-                        <td colspan="7" class="text-center">Tidak ada dokumen yang ditandai.</td>
+                        <td colspan="7" class="text-center">Tidak ada hasil untuk pencarian ini.</td>
                     </tr>
                 <?php endif; ?>
             </tbody>
         </table>
 
-        <!-- Tombol logout -->
+        <!-- Tombol kembali ke dashboard -->
+        <a href="dashboard_dosen.php" class="btn btn-secondary">Kembali ke Dashboard</a>
         <a href="logout.php" class="btn btn-danger">Logout</a>
     </div>
 </body>

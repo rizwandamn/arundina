@@ -26,18 +26,19 @@ if (isset($_POST['search'])) {
 
     // Periksa apakah search term tidak kosong
     if (!empty($searchTerm)) {
-        // Query pencarian dokumen berdasarkan title atau deskripsi
+        // Query pencarian dokumen yang ditandai oleh dosen yang sedang login
         $query = "
-            SELECT * 
-            FROM dokumen 
-            WHERE title LIKE ? 
-            OR deskripsi LIKE ?
+            SELECT d.* 
+            FROM dokumen d 
+            JOIN marked_dokumen md ON d.id_dokumen = md.id_dokumen 
+            WHERE md.id_user = ? 
+            AND (d.title LIKE ? OR d.deskripsi LIKE ?)
         ";
 
         // Mempersiapkan statement untuk menghindari SQL injection
         if ($stmt = mysqli_prepare($conn, $query)) {
             $likeTerm = "%" . $searchTerm . "%";
-            mysqli_stmt_bind_param($stmt, 'ss', $likeTerm, $likeTerm);
+            mysqli_stmt_bind_param($stmt, 'iss', $_SESSION['id_user'], $likeTerm, $likeTerm);
             mysqli_stmt_execute($stmt);
             $result = mysqli_stmt_get_result($stmt);
 
@@ -48,7 +49,6 @@ if (isset($_POST['search'])) {
 
             mysqli_stmt_close($stmt); // Tutup statement
         } else {
-            // Lebih baik jika Anda mengarahkan ke halaman kesalahan daripada die()
             header("Location: error.php?msg=" . urlencode("Query error: " . mysqli_error($conn)));
             exit();
         }
