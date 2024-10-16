@@ -5,27 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arsip Keputusan & Surat Tugas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .search-container {
-            max-width: 600px;
-            margin: 40px auto;
-        }
-        .search-box {
-            width: 100%;
-            padding: 10px;
-            font-size: 18px;
-            border: 1px solid #ced4da;
-            border-radius: 5px;
-        }
-        .search-button {
-            padding: 10px 20px;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-        }
-    </style>
+    <link rel="stylesheet" href="styles.css"> <!-- Tambahkan link ke file CSS eksternal -->
 </head>
 <body>
     <!-- Navbar -->
