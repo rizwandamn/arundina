@@ -18,12 +18,13 @@ $result = mysqli_query($conn, $query);
     <title>Arsip Keputusan & Surat Tugas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="index.css"> <!-- Tambahkan link ke file CSS eksternal -->
+    
 </head>
 <body>
     <!-- Navbar -->
     <nav class="navbar navbar-expand-lg navbar-light bg-primary">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Arsip Surat</a>
+            <a class="navbar-brand text-white" href="#">Arsip Surat</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
@@ -31,11 +32,11 @@ $result = mysqli_query($conn, $query);
                 <ul class="navbar-nav ms-auto">
                     <?php if (isset($_SESSION['username'])): ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="logout.php">Logout</a>
+                            <a class="nav-link text-white" href="logout.php">Logout</a>
                         </li>
                     <?php else: ?>
                         <li class="nav-item">
-                            <a class="nav-link" href="login.php">Login</a>
+                            <a class="nav-link text-white" href="login.php">Login</a>
                         </li>
                     <?php endif; ?>
                 </ul>
@@ -43,9 +44,9 @@ $result = mysqli_query($conn, $query);
         </div>
     </nav>
 
-    <!-- Form Pencarian -->
+    <!-- Hero Section dan Form Pencarian -->
     <div class="search-container">
-        <h1>Arsip Keputusan & Surat Tugas</h1>
+        <h1>Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
         <form method="GET" action="search.php">
             <input type="text" name="search" class="search-input form-control" placeholder="Cari dokumen..." required>
             <button type="submit" class="btn btn-primary btn-search">Cari</button>
@@ -79,7 +80,7 @@ $result = mysqli_query($conn, $query);
     </div>
 
     <!-- Footer -->
-    <footer class="bg-primary text-center py-4 mt-auto">
+    <footer class="text-center mt-auto">
         <p>&copy; 2024 Arsip Keputusan & Surat Tugas</p>
     </footer>
 
