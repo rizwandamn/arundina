@@ -22,18 +22,30 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
+$search = isset($_GET['search']) ? mysqli_real_escape_string($conn, $_GET['search']) : '';
+
 // Query untuk mengambil dokumen yang ditandai oleh dosen yang sedang login
 $query = "
     SELECT d.*
     FROM dokumen d
     JOIN marked_dokumen md ON d.id_dokumen = md.id_dokumen
     WHERE md.id_user = ?
-    ORDER BY d.created_at DESC
 ";
+
+if ($search) {
+    $query .= " AND (d.title LIKE ? OR d.no_surat LIKE ?)";
+}
+
+$query .= " ORDER BY d.created_at DESC";
 
 // Mempersiapkan statement SQL untuk menghindari SQL injection
 if ($stmt = mysqli_prepare($conn, $query)) {
-    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id_user']); // Bind parameter id_user
+    if ($search) {
+        $searchParam = "%" . $search . "%";
+        mysqli_stmt_bind_param($stmt, 'iss', $_SESSION['id_user'], $searchParam, $searchParam); // Bind parameter id_user dan pencarian
+    } else {
+        mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id_user']); // Bind parameter id_user
+    }
     mysqli_stmt_execute($stmt); // Eksekusi statement
     $result = mysqli_stmt_get_result($stmt); // Ambil hasil eksekusi query
 
@@ -58,8 +70,14 @@ if ($stmt = mysqli_prepare($conn, $query)) {
     <div class="container">
         <h1 class="mt-4">Dashboard Dosen</h1>
 
+        <!-- Form pencarian -->
+        <form method="GET" action="">
+            <input type="text" name="search" placeholder="Cari dokumen..." value="<?= htmlspecialchars($search); ?>" />
+            <button type="submit" class="btn btn-primary">Cari</button>
+        </form>
+
         <!-- Tabel daftar dokumen -->
-        <table class="table table-striped">
+        <table class="table table-striped mt-4">
             <thead>
                 <tr>
                     <th>No</th>
@@ -102,4 +120,3 @@ if ($stmt = mysqli_prepare($conn, $query)) {
     </div>
 </body>
 </html>
-

@@ -2,6 +2,21 @@
 session_start();
 require 'db.php'; // Koneksi ke database
 
+// Fungsi untuk mengecek apakah user sudah login
+function checkLogin() {
+    if (!isset($_SESSION['id_user'])) {
+        header("Location: login.php");
+        exit();
+    }
+}
+
+// Cek apakah pengguna adalah dosen dan sudah login
+checkLogin();
+if ($_SESSION['role'] !== 'dosen') {
+    header("Location: login.php");
+    exit();
+}
+
 $searchTerm = '';
 $results = [];
 
@@ -33,7 +48,9 @@ if (isset($_POST['search'])) {
 
             mysqli_stmt_close($stmt); // Tutup statement
         } else {
-            die("Query error: " . mysqli_error($conn));
+            // Lebih baik jika Anda mengarahkan ke halaman kesalahan daripada die()
+            header("Location: error.php?msg=" . urlencode("Query error: " . mysqli_error($conn)));
+            exit();
         }
     }
 }
