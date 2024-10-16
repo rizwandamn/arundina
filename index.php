@@ -45,13 +45,14 @@ $result = mysqli_query($conn, $query);
     </nav>
 
     <!-- Hero Section dan Form Pencarian -->
-    <div class="search-container">
-        <h1>Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
-        <form method="GET" action="search.php">
-            <input type="text" name="search" class="search-input form-control" placeholder="Cari dokumen..." required>
-            <button type="submit" class="btn btn-primary btn-search">Cari</button>
-        </form>
-    </div>
+<div class="search-container text-center mt-5"> <!-- Tambahkan class 'text-center' -->
+    <h1>Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
+    <form method="GET" action="search.php" class="d-inline-block mt-3"> <!-- Tambahkan 'd-inline-block' -->
+        <input type="text" name="search" class="search-input form-control" placeholder="Cari dokumen..." required>
+        <button type="submit" class="btn btn-primary btn-search mt-2">Cari</button>
+    </form>
+</div>
+
 
     <!-- Dokumen Terbaru -->
     <div class="container mt-5">
