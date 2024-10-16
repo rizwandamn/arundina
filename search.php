@@ -9,22 +9,34 @@ $results = [];
 if (isset($_POST['search'])) {
     $searchTerm = trim($_POST['search']);
 
-    // Ambil data dokumen yang sesuai dengan kata kunci pencarian
-    $query = "SELECT * FROM dokumen WHERE title LIKE ? OR deskripsi LIKE ?";
-    $stmt = mysqli_prepare($conn, $query);
-    $likeTerm = "%" . $searchTerm . "%";
-    mysqli_stmt_bind_param($stmt, 'ss', $likeTerm, $likeTerm);
-    mysqli_stmt_execute($stmt);
-    $result = mysqli_stmt_get_result($stmt);
+    // Periksa apakah search term tidak kosong
+    if (!empty($searchTerm)) {
+        // Query pencarian dokumen berdasarkan title atau deskripsi
+        $query = "
+            SELECT * 
+            FROM dokumen 
+            WHERE title LIKE ? 
+            OR deskripsi LIKE ?
+        ";
 
-    // Simpan hasil pencarian ke array
-    while ($row = mysqli_fetch_assoc($result)) {
-        $results[] = $row;
+        // Mempersiapkan statement untuk menghindari SQL injection
+        if ($stmt = mysqli_prepare($conn, $query)) {
+            $likeTerm = "%" . $searchTerm . "%";
+            mysqli_stmt_bind_param($stmt, 'ss', $likeTerm, $likeTerm);
+            mysqli_stmt_execute($stmt);
+            $result = mysqli_stmt_get_result($stmt);
+
+            // Simpan hasil pencarian ke array
+            while ($row = mysqli_fetch_assoc($result)) {
+                $results[] = $row;
+            }
+
+            mysqli_stmt_close($stmt); // Tutup statement
+        } else {
+            die("Query error: " . mysqli_error($conn));
+        }
     }
-
-    mysqli_stmt_close($stmt);
 }
-
 ?>
 
 <!DOCTYPE html>
@@ -41,7 +53,7 @@ if (isset($_POST['search'])) {
 
         <form method="post" class="mb-4">
             <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Cari dokumen..." value="<?php echo htmlspecialchars($searchTerm); ?>">
+                <input type="text" name="search" class="form-control" placeholder="Cari dokumen..." value="<?= htmlspecialchars($searchTerm); ?>">
                 <button class="btn btn-primary" type="submit">Cari</button>
             </div>
         </form>
@@ -50,15 +62,15 @@ if (isset($_POST['search'])) {
             <h2>Hasil Pencarian</h2>
             <div class="list-group">
                 <?php foreach ($results as $dokumen): ?>
-                    <a href="preview_dokumen.php?id=<?php echo $dokumen['id_dokumen']; ?>" class="list-group-item list-group-item-action">
-                        <h5 class="mb-1"><?php echo htmlspecialchars($dokumen['title']); ?></h5>
-                        <p class="mb-1"><?php echo htmlspecialchars($dokumen['deskripsi']); ?></p>
-                        <small><?php echo htmlspecialchars($dokumen['tanggal_surat']); ?></small>
+                    <a href="preview_dokumen.php?id=<?= urlencode($dokumen['id_dokumen']); ?>" class="list-group-item list-group-item-action">
+                        <h5 class="mb-1"><?= htmlspecialchars($dokumen['title']); ?></h5>
+                        <p class="mb-1"><?= htmlspecialchars($dokumen['deskripsi']); ?></p>
+                        <small><?= htmlspecialchars($dokumen['tanggal_surat']); ?></small>
                     </a>
                 <?php endforeach; ?>
             </div>
         <?php elseif (isset($_POST['search'])): ?>
-            <div class="alert alert-warning">Tidak ada dokumen ditemukan untuk kata kunci "<strong><?php echo htmlspecialchars($searchTerm); ?></strong>".</div>
+            <div class="alert alert-warning">Tidak ada dokumen ditemukan untuk kata kunci "<strong><?= htmlspecialchars($searchTerm); ?></strong>".</div>
         <?php endif; ?>
     </div>
 </body>

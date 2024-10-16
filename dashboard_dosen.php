@@ -1,10 +1,18 @@
 <?php
 session_start();
 require 'db.php'; // Koneksi ke database
-checkLogin();
 
-// Pastikan dosen sudah login
-if (!isset($_SESSION['role']) || $_SESSION['role'] != 'dosen') {
+// Fungsi untuk mengecek apakah user sudah login
+function checkLogin() {
+    if (!isset($_SESSION['id_user'])) {
+        header("Location: login.php");
+        exit();
+    }
+}
+
+// Cek apakah pengguna adalah dosen dan sudah login
+checkLogin();
+if ($_SESSION['role'] !== 'dosen') {
     header("Location: login.php");
     exit();
 }
@@ -14,8 +22,7 @@ ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
 error_reporting(E_ALL);
 
-
-// Query untuk mengambil dokumen yang ditandai
+// Query untuk mengambil dokumen yang ditandai oleh dosen yang sedang login
 $query = "
     SELECT d.*
     FROM dokumen d
@@ -24,13 +31,17 @@ $query = "
     ORDER BY d.created_at DESC
 ";
 
-$stmt = mysqli_prepare($conn, $query);
-mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id_user']);
-mysqli_stmt_execute($stmt);
-$result = mysqli_stmt_get_result($stmt);
+// Mempersiapkan statement SQL untuk menghindari SQL injection
+if ($stmt = mysqli_prepare($conn, $query)) {
+    mysqli_stmt_bind_param($stmt, 'i', $_SESSION['id_user']); // Bind parameter id_user
+    mysqli_stmt_execute($stmt); // Eksekusi statement
+    $result = mysqli_stmt_get_result($stmt); // Ambil hasil eksekusi query
 
-if (!$result) {
-    die("Query error: " . mysqli_error($conn));
+    if (!$result) {
+        die("Query error: " . mysqli_error($conn));
+    }
+} else {
+    die("Statement preparation failed: " . mysqli_error($conn));
 }
 
 ?>
@@ -61,7 +72,7 @@ if (!$result) {
                 </tr>
             </thead>
             <tbody>
-            <?php if (mysqli_num_rows($result) > 0): ?>
+                <?php if (mysqli_num_rows($result) > 0): ?>
                     <?php $no = 1; while ($row = mysqli_fetch_assoc($result)): ?>
                     <tr>
                         <td><?= htmlspecialchars($no++); ?></td>
@@ -72,9 +83,9 @@ if (!$result) {
                         <td><?= ucfirst(htmlspecialchars($row['jenis'])); ?></td>
                         <td>
                             <!-- Tombol aksi -->
-                            <a href="preview_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-info btn-sm">Preview</a>
-                            <a href="download_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-success btn-sm">Download</a>
-                            <a href="mark_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-primary btn-sm">Tandai</a>
+                            <a href="preview_dokumen.php?id=<?= urlencode($row['id_dokumen']); ?>" class="btn btn-info btn-sm">Preview</a>
+                            <a href="download_dokumen.php?id=<?= urlencode($row['id_dokumen']); ?>" class="btn btn-success btn-sm">Download</a>
+                            <a href="mark_dokumen.php?id=<?= urlencode($row['id_dokumen']); ?>" class="btn btn-primary btn-sm">Tandai</a>
                         </td>
                     </tr>
                     <?php endwhile; ?>
@@ -91,3 +102,4 @@ if (!$result) {
     </div>
 </body>
 </html>
+
