@@ -1,94 +1,103 @@
-<?php
-session_start();
-require 'db.php'; // Koneksi ke database
-
-// Fungsi untuk mengecek apakah user sudah login
-function checkLogin() {
-    if (!isset($_SESSION['id_user'])) {
-        header("Location: login.php");
-        exit();
-    }
-}
-
-// Cek apakah pengguna adalah dosen dan sudah login
-checkLogin();
-if ($_SESSION['role'] !== 'dosen') {
-    header("Location: login.php");
-    exit();
-}
-
-$searchTerm = '';
-$results = [];
-
-// Cek apakah ada kata kunci pencarian
-if (isset($_POST['search'])) {
-    $searchTerm = trim($_POST['search']);
-
-    // Periksa apakah search term tidak kosong
-    if (!empty($searchTerm)) {
-        // Query pencarian dokumen yang ditandai oleh dosen yang sedang login
-        $query = "
-            SELECT d.* 
-            FROM dokumen d 
-            JOIN marked_dokumen md ON d.id_dokumen = md.id_dokumen 
-            WHERE md.id_user = ? 
-            AND (d.title LIKE ? OR d.deskripsi LIKE ?)
-        ";
-
-        // Mempersiapkan statement untuk menghindari SQL injection
-        if ($stmt = mysqli_prepare($conn, $query)) {
-            $likeTerm = "%" . $searchTerm . "%";
-            mysqli_stmt_bind_param($stmt, 'iss', $_SESSION['id_user'], $likeTerm, $likeTerm);
-            mysqli_stmt_execute($stmt);
-            $result = mysqli_stmt_get_result($stmt);
-
-            // Simpan hasil pencarian ke array
-            while ($row = mysqli_fetch_assoc($result)) {
-                $results[] = $row;
-            }
-
-            mysqli_stmt_close($stmt); // Tutup statement
-        } else {
-            header("Location: error.php?msg=" . urlencode("Query error: " . mysqli_error($conn)));
-            exit();
-        }
-    }
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pencarian Dokumen</title>
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <title>Arsip Keputusan & Surat Tugas</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        .search-container {
+            max-width: 600px;
+            margin: 40px auto;
+        }
+        .search-box {
+            width: 100%;
+            padding: 10px;
+            font-size: 18px;
+            border: 1px solid #ced4da;
+            border-radius: 5px;
+        }
+        .search-button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-    <div class="container mt-4">
-        <h1>Pencarian Dokumen</h1>
-
-        <form method="post" class="mb-4">
-            <div class="input-group">
-                <input type="text" name="search" class="form-control" placeholder="Cari dokumen..." value="<?= htmlspecialchars($searchTerm); ?>">
-                <button class="btn btn-primary" type="submit">Cari</button>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-light bg-primary">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Arsip Surat</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <?php if (isset($_SESSION['username'])): ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="logout.php">Logout</a>
+                        </li>
+                    <?php else: ?>
+                        <li class="nav-item">
+                            <a class="nav-link" href="login.php">Login</a>
+                        </li>
+                    <?php endif; ?>
+                </ul>
             </div>
-        </form>
+        </div>
+    </nav>
 
-        <?php if (!empty($results)): ?>
-            <h2>Hasil Pencarian</h2>
-            <div class="list-group">
-                <?php foreach ($results as $dokumen): ?>
-                    <a href="preview_dokumen.php?id=<?= urlencode($dokumen['id_dokumen']); ?>" class="list-group-item list-group-item-action">
-                        <h5 class="mb-1"><?= htmlspecialchars($dokumen['title']); ?></h5>
-                        <p class="mb-1"><?= htmlspecialchars($dokumen['deskripsi']); ?></p>
-                        <small><?= htmlspecialchars($dokumen['tanggal_surat']); ?></small>
-                    </a>
-                <?php endforeach; ?>
-            </div>
-        <?php elseif (isset($_POST['search'])): ?>
-            <div class="alert alert-warning">Tidak ada dokumen ditemukan untuk kata kunci "<strong><?= htmlspecialchars($searchTerm); ?></strong>".</div>
-        <?php endif; ?>
+    <!-- Hero Section -->
+    <div class="container my-5">
+        <div class="jumbotron text-center">
+            <h1 class="display-4">Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
+            <p class="lead">Sistem ini menyimpan dokumen penting yang dapat diakses oleh Admin dan Dosen.</p>
+        </div>
+
+        <!-- Search Section -->
+        <div class="search-container text-center">
+            <form action="search.php" method="post">
+                <input type="text" name="search" class="search-box" placeholder="Cari dokumen..." required>
+                <button type="submit" class="search-button">Cari</button>
+            </form>
+        </div>
     </div>
+
+    <!-- Dokumen Terbaru -->
+    <div class="container">
+        <h3>Dokumen Terbaru</h3>
+        <div class="row">
+            <?php if (mysqli_num_rows($result) > 0): ?>
+                <?php while ($row = mysqli_fetch_assoc($result)): ?>
+                    <div class="col-md-4">
+                        <div class="card mb-4">
+                            <div class="card-body">
+                                <h5 class="card-title"><?= $row['title']; ?></h5>
+                                <p class="card-text"><?= $row['deskripsi']; ?></p>
+                                <p><strong>Kategori:</strong> <?= $row['kategori']; ?></p>
+                                <p><strong>Jenis:</strong> <?= $row['jenis']; ?></p>
+                                <p><strong>Tanggal:</strong> <?= $row['tanggal_surat']; ?></p>
+                                <a href="preview_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-primary">Preview</a>
+                                <a href="download_dokumen.php?id=<?= $row['id_dokumen']; ?>" class="btn btn-success">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                <?php endwhile; ?>
+            <?php else: ?>
+                <p>Tidak ada dokumen terbaru.</p>
+            <?php endif; ?>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-primary text-center py-4">
+        <p>&copy; 2024 Arsip Keputusan & Surat Tugas</p>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/js/bootstrap.bundle.min.js"></script>
 </body>
 </html>

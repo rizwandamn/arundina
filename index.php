@@ -17,12 +17,7 @@ $result = mysqli_query($conn, $query);
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Arsip Keputusan & Surat Tugas</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
-    <style>
-        .search-container {
-            max-width: 600px;
-            margin: 0 auto;
-        }
-    </style>
+    <link rel="stylesheet" href="index.css"> <!-- Tambahkan link ke file CSS eksternal -->
 </head>
 <body>
     <!-- Navbar -->
@@ -48,26 +43,17 @@ $result = mysqli_query($conn, $query);
         </div>
     </nav>
 
-    <!-- Hero Section -->
-    <div class="container my-5">
-        <div class="jumbotron text-center">
-            <h1 class="display-4">Selamat Datang di Arsip Keputusan & Surat Tugas</h1>
-            <p class="lead">Sistem ini menyimpan dokumen penting yang dapat diakses oleh Admin dan Dosen.</p>
-
-            <!-- Form Pencarian -->
-            <div class="search-container">
-                <form method="GET" action="search.php">
-                    <div class="input-group">
-                        <input type="text" name="search" class="form-control" placeholder="Cari dokumen..." required>
-                        <button type="submit" class="btn btn-primary">Cari</button>
-                    </div>
-                </form>
-            </div>
-        </div>
+    <!-- Form Pencarian -->
+    <div class="search-container">
+        <h1>Arsip Keputusan & Surat Tugas</h1>
+        <form method="GET" action="search.php">
+            <input type="text" name="search" class="search-input form-control" placeholder="Cari dokumen..." required>
+            <button type="submit" class="btn btn-primary btn-search">Cari</button>
+        </form>
     </div>
 
     <!-- Dokumen Terbaru -->
-    <div class="container">
+    <div class="container mt-5">
         <h3>Dokumen Terbaru</h3>
         <div class="row">
             <?php if (mysqli_num_rows($result) > 0): ?>
@@ -93,7 +79,7 @@ $result = mysqli_query($conn, $query);
     </div>
 
     <!-- Footer -->
-    <footer class="bg-primary text-center py-4">
+    <footer class="bg-primary text-center py-4 mt-auto">
         <p>&copy; 2024 Arsip Keputusan & Surat Tugas</p>
     </footer>
 
